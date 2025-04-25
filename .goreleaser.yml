@@ -1,0 +1,113 @@
+version: 2
+
+project_name: hellogophercamptest2
+
+before:
+  hooks:
+    - rm -rf ./dist
+    - go mod tidy
+    - git push
+    - git push --tags
+builds:
+  -
+    env:
+      - CGO_ENABLED=0
+    mod_timestamp: "{{ .CommitTimestamp }}"
+    flags:
+      - -trimpath
+    ldflags:
+      - -s
+      - -w
+      - -X github.com/ondrejsika/hellogophercamptest2/version.Version=v{{.Version}}
+    goos:
+      - windows
+      - linux
+      - darwin
+    goarch:
+      - amd64
+      - "386"
+      - arm
+      - arm64
+    goarm:
+      - "6"
+      - "7"
+    ignore:
+      - goos: darwin
+        goarch: "386"
+      - goos: windows
+        goarch: "arm"
+      - goos: windows
+        goarch: "arm64"
+      - goos: linux
+        goarch: arm
+        goarm: "6"
+    binary: hellogophercamptest2
+
+archives:
+  - formats: [ "tar.gz" ]
+    name_template: "{{ .ProjectName }}_v{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+
+release:
+  prerelease: auto
+
+checksum:
+  name_template: "{{ .ProjectName }}_checksums.txt"
+  algorithm: sha256
+
+brews:
+  -
+    name: hellogophercamptest2
+    repository:
+      owner: ondrejsika
+      name: homebrew-tap
+    skip_upload: auto
+    homepage: https://github.com/ondrejsika/hellogophercamptest2
+    url_template: "https://github.com/ondrejsika/hellogophercamptest2/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
+    directory: Formula
+    caveats: "How to use this binary: https://github.com/ondrejsika/hellogophercamptest2"
+    description: "hellogophercamptest2"
+    install: |
+      bin.install "hellogophercamptest2"
+    test: |
+      system "#{bin}/hellogophercamptest2 version"
+
+dockers:
+    -
+      goos: linux
+      goarch: amd64
+      image_templates:
+        - "ondrejsika/hellogophercamptest2:{{ .Tag }}"
+      dockerfile: Dockerfile.goreleaser
+      ids:
+        - hellogophercamptest2
+      build_flag_templates:
+        - "--platform=linux/amd64"
+        - "--label=org.opencontainers.image.created={{.Date}}"
+        - "--label=org.opencontainers.image.title={{.ProjectName}}"
+        - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+        - "--label=org.opencontainers.image.version={{.Version}}"
+        - "--label=org.label-schema.schema-version=1.0"
+        - "--label=org.label-schema.version={{.Version}}"
+        - "--label=org.label-schema.name={{.ProjectName}}"
+        - "--label=com.github.actions.name={{.ProjectName}}"
+        - "--label=repository=https://github.com/ondrejsika/hellogophercamptest2"
+        - "--label=maintainer=SikaLabs Opensource &lt;opensource@sikalabs.com&gt;"
+    - goos: linux
+      goarch: arm64
+      image_templates:
+        - "ondrejsika/hellogophercamptest2:{{ .Tag }}-arm64v8"
+      dockerfile: Dockerfile.goreleaser.arm64v8
+      ids:
+        - hellogophercamptest2
+      build_flag_templates:
+        - "--platform=linux/arm64"
+        - "--label=org.opencontainers.image.created={{.Date}}"
+        - "--label=org.opencontainers.image.title={{.ProjectName}}"
+        - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+        - "--label=org.opencontainers.image.version={{.Version}}"
+        - "--label=org.label-schema.schema-version=1.0"
+        - "--label=org.label-schema.version={{.Version}}"
+        - "--label=org.label-schema.name={{.ProjectName}}"
+        - "--label=com.github.actions.name={{.ProjectName}}"
+        - "--label=repository=https://github.com/ondrejsika/hellogophercamptest2"
+        - "--label=maintainer=SikaLabs Opensource &lt;opensource@sikalabs.com&gt;"

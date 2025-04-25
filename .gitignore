@@ -1,0 +1,16 @@
+# Mac
+.DS_Store
+
+# Editor
+.vscode
+.idea
+
+# Generic
+*.log
+*.backup
+
+# Go
+hellogophercamptest2
+*.exe
+/dist/**
+cobra-docs
